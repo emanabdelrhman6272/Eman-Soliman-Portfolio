@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* Brand */}
             <div>
-              <h3 className="text-xl font-bold gradient-text mb-4">Sarah Johnson</h3>
+              <h3 className="text-xl font-bold gradient-text mb-4">Eman Soliman</h3>
               <p className="text-muted-foreground text-sm">
                 Frontend Engineer passionate about creating beautiful, functional web experiences.
               </p>
@@ -38,7 +38,7 @@ const Footer = () => {
               <h4 className="font-semibold mb-4">Connect</h4>
               <div className="flex gap-3">
                 <a
-                  href="https://github.com"
+                  href="https://github.com/emanabdelrhman6272"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 bg-background hover:bg-primary/20 rounded-lg transition-colors border border-border hover:border-primary"
@@ -46,7 +46,7 @@ const Footer = () => {
                   <Github className="w-5 h-5" />
                 </a>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/in/eman-soliman-a97966341/overlay/about-this-profile/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3B%2FjVF7Yf%2FR468IF7cfiypZA%3D%3D"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 bg-background hover:bg-primary/20 rounded-lg transition-colors border border-border hover:border-primary"
@@ -54,7 +54,7 @@ const Footer = () => {
                   <Linkedin className="w-5 h-5" />
                 </a>
                 <a
-                  href="mailto:sarah@example.com"
+                  href="mailto:emanabdelrhman6272@gmail.com"
                   className="p-2 bg-background hover:bg-primary/20 rounded-lg transition-colors border border-border hover:border-primary"
                 >
                   <Mail className="w-5 h-5" />
@@ -64,11 +64,11 @@ const Footer = () => {
           </div>
 
           {/* Copyright */}
-          <div className="pt-8 border-t border-border text-center">
+          {/* <div className="pt-8 border-t border-border text-center">
             <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-              © {currentYear} Sarah Johnson. Made with <Heart className="w-4 h-4 text-destructive fill-destructive" /> and React
+              © {currentYear} Eman Soliman. Made with  and React
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

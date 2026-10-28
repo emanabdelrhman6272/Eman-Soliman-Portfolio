@@ -243,6 +243,7 @@ const Contact = () => {
     const serviceID = "service_60slu5v";
     const templateID = "template_7o1yej6";
     const publicKey = "JYC_YALgYX9zyD8Nc";
+  
 
     emailjs
       .send(

@@ -104,74 +104,79 @@ const Contact = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-start">
+          {/* Stretched Grid to equalize bottom lines */}
+          <div className="grid md:grid-cols-2 gap-8 items-stretch">
+            {/* Left side: Form */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6 }}
+              className="h-full flex flex-col"
             >
-              <Card className="bg-blue-50/75 dark:bg-card/90 backdrop-blur-sm border-blue-200/60 dark:border-border shadow-sm hover:border-primary/50 transition-all">
-                <CardContent className="p-6 md:p-8">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label
-                        htmlFor="name"
-                        className="block text-sm font-medium mb-2"
-                      >
-                        Name
-                      </label>
-                      <Input
-                        id="name"
-                        placeholder="Your name"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium mb-2"
-                      >
-                        Email
-                      </label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your.email@example.com"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="message"
-                        className="block text-sm font-medium mb-2"
-                      >
-                        Message
-                      </label>
-                      <Textarea
-                        id="message"
-                        placeholder="Tell me about your project or message..."
-                        rows={5}
-                        value={formData.message}
-                        onChange={(e) =>
-                          setFormData({ ...formData, message: e.target.value })
-                        }
-                        className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary resize-none"
-                      />
+              <Card className="bg-blue-50/75 dark:bg-card/90 backdrop-blur-sm border-blue-200/60 dark:border-border shadow-sm hover:border-primary/50 transition-all h-full flex flex-col justify-between">
+                <CardContent className="p-6 md:p-8 flex-1 flex flex-col justify-between">
+                  <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between gap-5">
+                    <div className="space-y-4">
+                      <div>
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium mb-1.5"
+                        >
+                          Name
+                        </label>
+                        <Input
+                          id="name"
+                          placeholder="Your name"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                          className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium mb-1.5"
+                        >
+                          Email
+                        </label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="your.email@example.com"
+                          value={formData.email}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
+                          className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="message"
+                          className="block text-sm font-medium mb-1.5"
+                        >
+                          Message
+                        </label>
+                        <Textarea
+                          id="message"
+                          placeholder="Tell me about your project or message..."
+                          rows={4}
+                          value={formData.message}
+                          onChange={(e) =>
+                            setFormData({ ...formData, message: e.target.value })
+                          }
+                          className="bg-white/80 dark:bg-background border-blue-200/70 dark:border-border focus-visible:ring-primary resize-none min-h-[110px]"
+                        />
+                      </div>
                     </div>
                     <Button
                       type="submit"
                       variant="hero"
                       size="lg"
-                      className="w-full"
+                      className="w-full mt-2"
                       disabled={isSubmitting}
                     >
                       <Send
@@ -184,71 +189,75 @@ const Contact = () => {
               </Card>
             </motion.div>
 
-            {/* Contact Info - Slide from Right */}
-            <div className="space-y-6">
-              {contactInfo.map((info, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: index * 0.12 }}
-                  whileHover={{ y: -3 }}
-                >
-                  <Card className="bg-blue-50/75 dark:bg-card/90 backdrop-blur-sm border-blue-200/60 dark:border-border hover:border-primary/50 transition-all duration-300">
-                    <CardContent className="p-6">
-                      {info.href ? (
-                        <a
-                          href={info.href}
-                          className="flex items-start gap-4 group"
-                          target={
-                            info.href.startsWith("http") ? "_blank" : undefined
-                          }
-                          rel={
-                            info.href.startsWith("http")
-                              ? "noopener noreferrer"
-                              : undefined
-                          }
-                        >
-                          <div className="p-3 bg-primary/10 rounded-lg group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-                            <info.icon className="w-6 h-6 text-primary" />
+            {/* Right side: Contact Info + Let's Connect */}
+            <div className="flex flex-col justify-between h-full gap-4">
+              <div className="space-y-3.5">
+                {contactInfo.map((info, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.5, delay: index * 0.12 }}
+                    whileHover={{ y: -3 }}
+                  >
+                    <Card className="bg-blue-50/75 dark:bg-card/90 backdrop-blur-sm border-blue-200/60 dark:border-border hover:border-primary/50 transition-all duration-300">
+                      <CardContent className="p-4 md:p-5">
+                        {info.href ? (
+                          <a
+                            href={info.href}
+                            className="flex items-start gap-4 group"
+                            target={
+                              info.href.startsWith("http") ? "_blank" : undefined
+                            }
+                            rel={
+                              info.href.startsWith("http")
+                                ? "noopener noreferrer"
+                                : undefined
+                            }
+                          >
+                            <div className="p-2.5 bg-primary/10 rounded-lg group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                              <info.icon className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-0.5">
+                                {info.label}
+                              </p>
+                              <p className="text-sm md:text-base font-medium group-hover:text-primary transition-colors">
+                                {info.value}
+                              </p>
+                            </div>
+                          </a>
+                        ) : (
+                          <div className="flex items-start gap-4">
+                            <div className="p-2.5 bg-primary/10 rounded-lg">
+                              <info.icon className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-0.5">
+                                {info.label}
+                              </p>
+                              <p className="text-sm md:text-base font-medium">{info.value}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-1">
-                              {info.label}
-                            </p>
-                            <p className="font-medium group-hover:text-primary transition-colors">
-                              {info.value}
-                            </p>
-                          </div>
-                        </a>
-                      ) : (
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-primary/10 rounded-lg">
-                            <info.icon className="w-6 h-6 text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-1">
-                              {info.label}
-                            </p>
-                            <p className="font-medium">{info.value}</p>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
 
+              {/* Bottom card aligned perfectly with the form bottom */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: 0.35 }}
+                className="mt-auto"
               >
                 <Card className="bg-blue-50/75 dark:bg-card/90 backdrop-blur-sm border-blue-200/60 dark:border-border hover:border-primary/40 transition-colors">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold mb-3">Let's Connect</h3>
+                  <CardContent className="p-5 md:p-6">
+                    <h3 className="font-semibold mb-2">Let's Connect</h3>
                     <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       I'm always open to discussing new projects, creative
                       ideas, or opportunities to be part of your vision.

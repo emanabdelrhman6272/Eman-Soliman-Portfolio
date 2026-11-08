@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Github, Linkedin, Mail, ChevronDown, Download } from "lucide-react";
+import {
+  ArrowRight,
+  Github,
+  Linkedin,
+  Mail,
+  ChevronDown,
+  Download,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 
 const roles = [
   "Frontend Engineer",
@@ -24,7 +30,6 @@ const Hero = () => {
         // Typing forward
         setCurrentText(fullText.substring(0, currentText.length + 1));
         if (currentText.length + 1 === fullText.length) {
-          // Pause before deleting
           setTimeout(() => setIsDeleting(true), 1800);
         }
       } else {
@@ -56,8 +61,6 @@ const Hero = () => {
       id="home"
       className="min-h-screen flex items-center justify-center relative overflow-hidden pt-28 pb-16"
     >
-
-
       {/* Subtle Ambient Light Orbs */}
       <div className="absolute top-1/4 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float-slow pointer-events-none" />
       <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-float-reverse pointer-events-none" />
@@ -75,12 +78,13 @@ const Hero = () => {
           </div>
 
           <h1 className="mb-6 font-extrabold tracking-tight">
-            Hi, I'm <span className="gradient-text drop-shadow-sm">Eman Soliman</span>
+            Hi, I'm{" "}
+            <span className="gradient-text drop-shadow-sm">Eman Soliman</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Crafting beautiful, responsive, and accessible web experiences with React, JavaScript,
-            and modern frontend technologies.
+            Crafting beautiful, responsive, and accessible web experiences with
+            React, JavaScript, and modern frontend technologies.
           </p>
 
           {/* Action Buttons with Download CV */}
@@ -91,7 +95,10 @@ const Hero = () => {
               className="group shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto"
               asChild
             >
-              <a href="#projects" onClick={(e) => scrollToSection(e, "#projects")}>
+              <a
+                href="#projects"
+                onClick={(e) => scrollToSection(e, "#projects")}
+              >
                 View My Work
                 <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
               </a>
@@ -120,7 +127,10 @@ const Hero = () => {
               className="hover:-translate-y-0.5 backdrop-blur-sm transition-all duration-300 w-full sm:w-auto text-muted-foreground hover:text-foreground"
               asChild
             >
-              <a href="#contact" onClick={(e) => scrollToSection(e, "#contact")}>
+              <a
+                href="#contact"
+                onClick={(e) => scrollToSection(e, "#contact")}
+              >
                 Contact Me
               </a>
             </Button>
@@ -164,7 +174,9 @@ const Hero = () => {
         className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors duration-300 z-10"
         aria-label="Scroll to about section"
       >
-        <span className="text-xs uppercase tracking-widest font-semibold text-muted-foreground/80">Scroll</span>
+        <span className="text-xs uppercase tracking-widest font-semibold text-muted-foreground/80">
+          Scroll
+        </span>
         <ChevronDown className="w-5 h-5 animate-bounce" />
       </a>
     </section>

@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { ExternalLink, Github, Plus, Trash2 } from "lucide-react";
+import {
+  ExternalLink,
+  Github,
+  Plus,
+  Trash2,
+  Pencil,
+  Upload,
+  X,
+  Image as ImageIcon,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -62,6 +71,15 @@ const initialProjects: Project[] = [
   },
 ];
 
+const emptyFormData = {
+  title: "",
+  description: "",
+  technologies: "",
+  github: "",
+  demo: "",
+  image: "",
+};
+
 const Projects = () => {
   const [projectList, setProjectList] = useState<Project[]>(() => {
     try {
@@ -72,14 +90,9 @@ const Projects = () => {
     }
   });
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [newProj, setNewProj] = useState({
-    title: "",
-    description: "",
-    technologies: "",
-    github: "",
-    image: "",
-  });
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [formData, setFormData] = useState(emptyFormData);
 
   useEffect(() => {
     try {
@@ -92,32 +105,82 @@ const Projects = () => {
     }
   }, [projectList]);
 
-  const handleAddProject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProj.title.trim() || !newProj.description.trim()) return;
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const techArray = newProj.technologies
+    if (file.size > 3 * 1024 * 1024) {
+      alert("Try to upload an image smaller than 3MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === "string") {
+        setFormData((prev) => ({ ...prev, image: reader.result as string }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Open form for editing
+  const handleStartEdit = (index: number) => {
+    const p = projectList[index];
+    setFormData({
+      title: p.title,
+      description: p.description,
+      technologies: p.technologies.join(", "),
+      github: p.github || "",
+      demo: p.demo || "",
+      image: p.image || "",
+    });
+    setEditingIndex(index);
+    setIsFormOpen(true);
+  };
+
+  // Open form for adding new
+  const handleStartAdd = () => {
+    setFormData(emptyFormData);
+    setEditingIndex(null);
+    setIsFormOpen(true);
+  };
+
+  const handleCancel = () => {
+    setFormData(emptyFormData);
+    setEditingIndex(null);
+    setIsFormOpen(false);
+  };
+
+  // Submit either new or edited project
+  const handleSubmitProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.description.trim()) return;
+
+    const techArray = formData.technologies
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean);
 
-    const projectToAdd: Project = {
-      title: newProj.title.trim(),
-      description: newProj.description.trim(),
+    const projectData: Project = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
       technologies: techArray.length > 0 ? techArray : ["React"],
-      github: newProj.github.trim() || "https://github.com",
-      image: newProj.image.trim() || "/images/weatherapp1.PNG",
+      github: formData.github.trim() || "https://github.com",
+      demo: formData.demo.trim() || undefined,
+      image: formData.image.trim() || "/images/weatherapp1.PNG",
     };
 
-    setProjectList([projectToAdd, ...projectList]);
-    setNewProj({
-      title: "",
-      description: "",
-      technologies: "",
-      github: "",
-      image: "",
-    });
-    setIsAdding(false);
+    if (editingIndex !== null) {
+      // Update existing project
+      const updated = [...projectList];
+      updated[editingIndex] = projectData;
+      setProjectList(updated);
+    } else {
+      // Add new project
+      setProjectList([projectData, ...projectList]);
+    }
+
+    handleCancel();
   };
 
   const handleDeleteProject = (indexToDelete: number) => {
@@ -141,10 +204,211 @@ const Projects = () => {
             </h2>
             <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-8 rounded-full" />
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              A selection of my recent work, university graduation project, and ITI applications
+              A selection of my recent work, university graduation project, and
+              ITI applications
             </p>
           </motion.div>
 
+          {/* Project Form for Adding or Editing */}
+          {isFormOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-12"
+            >
+              <Card className="bg-card/95 backdrop-blur-md border border-primary/50 p-6 md:p-8 shadow-2xl max-w-2xl mx-auto rounded-2xl">
+                <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
+                  <div>
+                    <h3 className="font-bold text-xl gradient-text">
+                      {editingIndex !== null
+                        ? "Edit Project"
+                        : "Add New Project"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {editingIndex !== null
+                        ? "Editing"
+                        : " You can edit or add a new project to showcase in your portfolio."}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleCancel}
+                    className="rounded-full"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <form onSubmit={handleSubmitProject} className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                      Project Title
+                    </label>
+                    <Input
+                      placeholder="e.g. Meta Child or Weather App"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                      Description
+                    </label>
+                    <Textarea
+                      placeholder="Explain Project idea"
+                      rows={3}
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                      Technologies
+                    </label>
+                    <Input
+                      placeholder="React, TypeScript, Tailwind CSS, Firebase..."
+                      value={formData.technologies}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          technologies: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                        GitHub
+                      </label>
+                      <Input
+                        placeholder="https://github.com/..."
+                        value={formData.github}
+                        onChange={(e) =>
+                          setFormData({ ...formData, github: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                        Live Demo
+                      </label>
+                      <Input
+                        placeholder="https://my-app.vercel.app"
+                        value={formData.demo}
+                        onChange={(e) =>
+                          setFormData({ ...formData, demo: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Image Upload Zone */}
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+                      Upload Image
+                    </label>
+
+                    {formData.image ? (
+                      <div className="relative rounded-xl overflow-hidden border border-border h-48 bg-muted/30 group">
+                        <img
+                          src={formData.image}
+                          alt="Project Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                          <label
+                            htmlFor="project-img-file"
+                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-all shadow-md"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Change Image
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData({ ...formData, image: "" })
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-destructive text-destructive-foreground rounded-lg text-xs font-medium hover:bg-destructive/90 transition-all shadow-md"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete This Image
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor="project-img-file"
+                        className="flex flex-col items-center justify-center gap-2.5 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary bg-muted/20 hover:bg-muted/40 cursor-pointer transition-all text-center"
+                      >
+                        <div className="p-3 rounded-full bg-primary/10 text-primary">
+                          <Upload className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-foreground">
+                            Upload
+                          </span>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            PNG or JPG or WebP
+                          </p>
+                        </div>
+                      </label>
+                    )}
+
+                    <input
+                      type="file"
+                      id="project-img-file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+
+                    {/* Optional URL */}
+                    <div className="mt-2">
+                      <Input
+                        placeholder="/images/..."
+                        value={formData.image}
+                        onChange={(e) =>
+                          setFormData({ ...formData, image: e.target.value })
+                        }
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-4 border-t border-border">
+                    <Button type="submit" className="flex-1">
+                      {editingIndex !== null
+                        ? "Save Editing"
+                        : " Adding new Project "}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleCancel}
+                    >
+                      Exit
+                    </Button>
+                  </div>
+                </form>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Projects Grid (Compact 3 columns on large screens) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projectList.map((project, index) => (
               <motion.div
@@ -160,17 +424,32 @@ const Projects = () => {
                   <div>
                     <CardHeader className="p-4 pb-2">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="text-base md:text-lg font-bold group-hover:text-primary transition-colors line-clamp-1" title={project.title}>
+                        <h3
+                          className="text-base md:text-lg font-bold group-hover:text-primary transition-colors line-clamp-1"
+                          title={project.title}
+                        >
                           {project.title}
                         </h3>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProject(index)}
-                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
-                          title="Delete project"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+
+                        {/* Action buttons: Edit & Delete */}
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(index)}
+                            className="p-1 text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-primary/10"
+                            title="Edit Project"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(index)}
+                            className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-destructive/10"
+                            title="Delete Project"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
                       {project.image && (
@@ -189,15 +468,17 @@ const Projects = () => {
                         {project.description}
                       </p>
                       <div className="flex flex-wrap gap-1.5 pt-0.5">
-                        {project.technologies.slice(0, 4).map((tech, techIndex) => (
-                          <Badge
-                            key={techIndex}
-                            variant="secondary"
-                            className="text-[11px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
-                          >
-                            {tech}
-                          </Badge>
-                        ))}
+                        {project.technologies
+                          .slice(0, 4)
+                          .map((tech, techIndex) => (
+                            <Badge
+                              key={techIndex}
+                              variant="secondary"
+                              className="text-[11px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
+                            >
+                              {tech}
+                            </Badge>
+                          ))}
                         {project.technologies.length > 4 && (
                           <Badge
                             variant="outline"
@@ -252,70 +533,13 @@ const Projects = () => {
               </motion.div>
             ))}
 
-            {isAdding ? (
-              <Card className="bg-card border-primary p-6 animate-fade-in flex flex-col justify-between">
-                <form onSubmit={handleAddProject} className="space-y-3">
-                  <h3 className="font-bold text-lg gradient-text">
-                    Add New Project
-                  </h3>
-                  <Input
-                    placeholder="Project Title"
-                    value={newProj.title}
-                    onChange={(e) =>
-                      setNewProj({ ...newProj, title: e.target.value })
-                    }
-                    required
-                  />
-                  <Textarea
-                    placeholder="Project Description"
-                    value={newProj.description}
-                    onChange={(e) =>
-                      setNewProj({ ...newProj, description: e.target.value })
-                    }
-                    required
-                  />
-                  <Input
-                    placeholder="Technologies (comma separated e.g. React, TypeScript)"
-                    value={newProj.technologies}
-                    onChange={(e) =>
-                      setNewProj({ ...newProj, technologies: e.target.value })
-                    }
-                  />
-                  <Input
-                    placeholder="GitHub URL"
-                    value={newProj.github}
-                    onChange={(e) =>
-                      setNewProj({ ...newProj, github: e.target.value })
-                    }
-                  />
-                  <Input
-                    placeholder="Image URL (e.g. /images/topamine1.PNG)"
-                    value={newProj.image}
-                    onChange={(e) =>
-                      setNewProj({ ...newProj, image: e.target.value })
-                    }
-                  />
-                  <div className="flex gap-2 pt-2">
-                    <Button type="submit" size="sm">
-                      Save Project
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsAdding(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </Card>
-            ) : (
+            {/* Add Custom Project Button Trigger */}
+            {!isFormOpen && (
               <div className="col-span-full flex justify-center pt-4">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsAdding(true)}
+                  onClick={handleStartAdd}
                   className="text-muted-foreground hover:text-primary border-dashed hover:border-primary"
                 >
                   <Plus className="w-4 h-4 mr-2" />

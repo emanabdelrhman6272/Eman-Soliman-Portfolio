@@ -102,7 +102,7 @@ const Navigation = () => {
             </Button>
           </div>
 
-          {/* Mobile Actions (زر التبديل + زر القائمة) */}
+          {/* Mobile Actions (Theme toggle + Menu button) */}
           <div className="flex items-center gap-2 md:hidden">
             <Button
               variant="ghost"
@@ -144,7 +144,7 @@ const Navigation = () => {
               </a>
             ))}
 
-            {/* زر CV للموبايل */}
+            {/* Mobile Resume Link */}
             <a
               href="/cv.pdf"
               target="_blank"

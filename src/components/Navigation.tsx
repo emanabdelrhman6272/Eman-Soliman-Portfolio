@@ -47,11 +47,18 @@ const Navigation = () => {
           <a
             href="#home"
             onClick={(e) => scrollToSection(e, "#home")}
-            className="text-xl md:text-2xl font-bold gradient-text"
+            className="group flex flex-col justify-center select-none"
           >
-            Portfolio
+            <div className="flex items-center gap-1.5">
+              <span className="text-lg md:text-xl font-black gradient-text tracking-tight group-hover:opacity-90 transition-opacity">
+                Eman Soliman
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            </div>
+            <span className="text-[10px] md:text-[11px] font-medium text-muted-foreground tracking-wider uppercase group-hover:text-primary transition-colors">
+              Bringing Ideas to Life
+            </span>
           </a>
-
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
             {navLinks.map((link) => (
@@ -66,7 +73,6 @@ const Navigation = () => {
               </a>
             ))}
 
-            {/* زر CV للكمبيوتر */}
             <Button
               variant="outline"
               size="sm"
@@ -84,7 +90,6 @@ const Navigation = () => {
               </a>
             </Button>
 
-            {/* زر التبديل للكمبيوتر */}
             <Button
               variant="ghost"
               size="icon"

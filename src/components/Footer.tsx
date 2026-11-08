@@ -10,9 +10,12 @@ const Footer = () => {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* Brand */}
             <div>
-              <h3 className="text-xl font-bold gradient-text mb-4">Eman Soliman</h3>
+              <h3 className="text-xl font-bold gradient-text mb-4">
+                Eman Soliman
+              </h3>
               <p className="text-muted-foreground text-sm">
-                Frontend Engineer passionate about creating beautiful, functional web experiences.
+                Frontend Engineer passionate about creating beautiful,
+                functional web experiences.
               </p>
             </div>
 
@@ -20,7 +23,14 @@ const Footer = () => {
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-sm">
-                {["Home", "About", "Skills", "Projects", "Experience", "Contact"].map((link) => (
+                {[
+                  "Home",
+                  "About",
+                  "Skills",
+                  "Projects",
+                  "Experience",
+                  "Contact",
+                ].map((link) => (
                   <li key={link}>
                     <a
                       href={`#${link.toLowerCase()}`}

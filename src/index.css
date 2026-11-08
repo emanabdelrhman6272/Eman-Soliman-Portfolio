@@ -7,26 +7,20 @@ All colors MUST be HSL.
 */
 
 @layer base {
-  /* =========================================================
-     الباليت الكلاسيكي الأنيق والبسيط (Classic Minimalist & Slate)
-     ========================================================= */
-
-  /* الوضع الفاتح (Light Mode) */
+  /* Light Mode */
   :root {
-    --background: 0 0% 100%;
+    --background: 215 80% 99%;
     --foreground: 222.2 47.4% 11.2%;
 
-    --card: 0 0% 100%;
+    --card: 214 85% 98%;
     --card-foreground: 222.2 47.4% 11.2%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
 
-    /* الأزرق الكلاسيكي الهادئ والراقي */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 0 0% 100%;
 
-    /* الرمادي الفولاذي الكلاسيكي */
     --secondary: 215 16% 47%;
     --secondary-foreground: 0 0% 100%;
 
@@ -45,7 +39,6 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* تدرج كلاسيكي راقي جداً (كربون داكن ⬅️ رمادي أنيق ⬅️ كحلي هادئ) */
     --gradient-primary: linear-gradient(
       135deg,
       #0f172a 0%,
@@ -53,15 +46,19 @@ All colors MUST be HSL.
       #2563eb 100%
     );
     --gradient-secondary: linear-gradient(135deg, #2563eb 0%, #0f172a 100%);
-    --gradient-hero: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
+    --gradient-hero: linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f8fafc 50%,
+      #f1f5f9 100%
+    );
 
     --glow-primary: 0 0 25px rgba(37, 99, 235, 0.15);
     --glow-accent: 0 0 25px rgba(15, 23, 42, 0.1);
   }
 
-  /* الوضع الداكن (Dark Mode) */
+  /* Dark Mode */
   .dark {
-    /* خلفية كربونية كلاسيكية فخمة */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
@@ -71,11 +68,9 @@ All colors MUST be HSL.
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    /* الأزرق الهادئ الكلاسيكي */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222 47% 6%;
 
-    /* الفضي الأنيق */
     --secondary: 215 20% 65%;
     --secondary-foreground: 210 40% 98%;
 
@@ -92,7 +87,6 @@ All colors MUST be HSL.
     --input: 217.2 32.6% 16%;
     --ring: 217.2 91.2% 59.8%;
 
-    /* تدرج كلاسيكي هادئ وفخم (أبيض فضي ⬅️ بلاتينيوم ⬅️ أزرق سماوي ناعم) */
     --gradient-primary: linear-gradient(
       135deg,
       #ffffff 0%,

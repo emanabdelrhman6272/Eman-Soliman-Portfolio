@@ -6,12 +6,18 @@ import Projects from "@/components/Projects";
 // import Experience from "@/components/Experience";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import ScrollProgress from "@/components/ScrollProgress";
+import ScrollToTop from "@/components/ScrollToTop";
+import DynamicBackground from "@/components/DynamicBackground";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden bg-background text-foreground">
+      {/* Dynamic Animated Particles & Aurora Background */}
+      <DynamicBackground />
+      <ScrollProgress />
       <Navigation />
-      <main>
+      <main className="relative z-10">
         <Hero />
         <About />
         <Skills />
@@ -19,7 +25,10 @@ const Index = () => {
         {/* <Experience /> */}
         <Contact />
       </main>
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
+      <ScrollToTop />
     </div>
   );
 };

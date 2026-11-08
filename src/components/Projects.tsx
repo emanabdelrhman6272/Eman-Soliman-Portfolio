@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { motion } from "framer-motion";
 
 interface Project {
   title: string;
@@ -22,16 +23,16 @@ interface Project {
 
 const initialProjects: Project[] = [
   {
-    title: "Topamine(E-LearningPlatform)",
+    title: "Topamine (E-Learning Platform)",
     image: "/images/topamine1.PNG",
     description:
-      "Developed a full-featured learning platform with CRUD operations and role-based authentication using React, Firebase, and json-server-auth. Implemented secure dashboards for students, teachers, and admins, with teacher approval workflow, Paymob payment integration, real-time notifications, messaging, and comprehensive admin tools for user and course management",
+      "Graduation project at ITI. Developed a full-featured learning platform with CRUD operations and role-based authentication using React, Firebase, and json-server-auth. Implemented secure dashboards for students, teachers, and admins, Paymob payment integration, real-time notifications, and messaging.",
     technologies: [
-      "typescript",
-      "Figma",
-      "Firebase cloud Firestore",
+      "TypeScript",
       "React",
-      "MUI",
+      "Firebase Firestore",
+      "Material-UI",
+      "Paymob",
     ],
     github: "https://github.com/JohnIhab/Topamine-E_Learning-Platform",
   },
@@ -39,24 +40,32 @@ const initialProjects: Project[] = [
     title: "Meta Child",
     image: "/images/metachild1.PNG",
     description:
-      "Social Media Platform for Children Developed a Facebook-like web application tailored for children using React, Material-UI(MUI), and JSON ServerAuth.",
-    technologies: ["react", "MUI", "Javascript"],
+      "Social Media Platform tailored for children. Developed a Facebook-like web application with child-safe features, posts, and interactive UI using React, Material-UI (MUI), and JSON Server Auth.",
+    technologies: ["React", "Material-UI", "JavaScript", "JSON Server"],
     github: "https://github.com/emanabdelrhman6272/reactFinallProject",
   },
   {
     title: "Weather App",
     image: "/images/weatherapp1.PNG",
     description:
-      "Weather App I developed a responsive Weather App. The application fetches real-time weather data through a public API provided by https://openweathermap.org/api.",
-    technologies: ["HTML", "CSS", "JavaScript"],
+      "A responsive Weather forecast web application. Fetches live real-time weather data and 5-day forecasts through OpenWeatherMap public REST API with dynamic UI weather themes.",
+    technologies: ["HTML5", "CSS3", "JavaScript", "REST API"],
     github: "https://github.com/emanabdelrhman6272/Weather-App",
+  },
+  {
+    title: "Self-Driving Car for Egyptian Streets (V2X)",
+    image: "/images/topamine1.PNG",
+    description:
+      "University Graduation Project (Faculty of Computers & AI, Grade: Excellent). Advanced self-driving vehicle using V2X (V2V, V2I, V2P) communication to detect obstacles, interact with traffic lights, and provide real-time user mobile app control.",
+    technologies: ["Python", "Computer Vision", "Deep Learning", "C++", "V2X"],
+    github: "https://github.com/emanabdelrhman6272",
   },
 ];
 
 const Projects = () => {
   const [projectList, setProjectList] = useState<Project[]>(() => {
     try {
-      const saved = localStorage.getItem("eman_portfolio_projects");
+      const saved = localStorage.getItem("eman_portfolio_projects_v2");
       return saved ? JSON.parse(saved) : initialProjects;
     } catch {
       return initialProjects;
@@ -75,7 +84,7 @@ const Projects = () => {
   useEffect(() => {
     try {
       localStorage.setItem(
-        "eman_portfolio_projects",
+        "eman_portfolio_projects_v2",
         JSON.stringify(projectList),
       );
     } catch (e) {
@@ -116,110 +125,131 @@ const Projects = () => {
   };
 
   return (
-    <section id="projects" className="py-20 md:py-32 relative">
+    <section id="projects" className="py-20 md:py-32 relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 animate-fade-in">
+          {/* Animated Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="mb-4">
               Featured <span className="gradient-text">Projects</span>
             </h2>
-            <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-8" />
+            <div className="w-20 h-1 bg-gradient-to-r from-primary to-accent mx-auto mb-8 rounded-full" />
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              A selection of my recent work and personal projects
+              A selection of my recent work, university graduation project, and ITI applications
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projectList.map((project, index) => (
-              <Card
+              <motion.div
                 key={index}
-                className="bg-card border-border hover:border-primary/50 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group animate-fade-in flex flex-col justify-between overflow-hidden"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -6 }}
+                className="h-full"
               >
-                <div>
-                  <CardHeader>
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="text-xl font-bold group-hover:text-primary transition-colors">
-                        {project.title}
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProject(index)}
-                        className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-                        title="Delete project"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {project.image && (
-                      <div className="overflow-hidden rounded-lg mt-3">
-                        <img
-                          src={project.image}
-                          alt={project.title}
-                          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                    )}
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {project.technologies.map((tech, techIndex) => (
-                        <Badge
-                          key={techIndex}
-                          variant="secondary"
-                          className="text-xs"
+                <Card className="bg-card/90 backdrop-blur-sm border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group flex flex-col justify-between overflow-hidden h-full rounded-xl">
+                  <div>
+                    <CardHeader className="p-4 pb-2">
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="text-base md:text-lg font-bold group-hover:text-primary transition-colors line-clamp-1" title={project.title}>
+                          {project.title}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProject(index)}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all p-1"
+                          title="Delete project"
                         >
-                          {tech}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </div>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
 
-                <CardFooter className="flex gap-3 pt-4">
-                  {project.github && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="flex-1"
-                    >
-                      <a
-                        href={project.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2"
+                      {project.image && (
+                        <div className="overflow-hidden rounded-lg mt-2.5 bg-muted/30 h-36 md:h-40 w-full border border-border/40">
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
+                    </CardHeader>
+
+                    <CardContent className="p-4 pt-2 space-y-3">
+                      <p className="text-muted-foreground text-xs md:text-sm leading-relaxed line-clamp-3">
+                        {project.description}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {project.technologies.slice(0, 4).map((tech, techIndex) => (
+                          <Badge
+                            key={techIndex}
+                            variant="secondary"
+                            className="text-[11px] px-2 py-0.5 bg-primary/10 text-primary border-primary/20"
+                          >
+                            {tech}
+                          </Badge>
+                        ))}
+                        {project.technologies.length > 4 && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0.5 text-muted-foreground"
+                          >
+                            +{project.technologies.length - 4}
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </div>
+
+                  <CardFooter className="p-4 pt-3 flex gap-2 border-t border-border/40">
+                    {project.github && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="flex-1 h-8 text-xs hover:border-primary"
                       >
-                        <Github className="w-4 h-4" />
-                        Code
-                      </a>
-                    </Button>
-                  )}
-                  {project.demo && (
-                    <Button
-                      variant="default"
-                      size="sm"
-                      asChild
-                      className="flex-1"
-                    >
-                      <a
-                        href={project.demo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2"
+                        <a
+                          href={project.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5"
+                        >
+                          <Github className="w-3.5 h-3.5" />
+                          Code
+                        </a>
+                      </Button>
+                    )}
+                    {project.demo && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        asChild
+                        className="flex-1 h-8 text-xs"
                       >
-                        <ExternalLink className="w-4 h-4" />
-                        Demo
-                      </a>
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
+                        <a
+                          href={project.demo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-1.5"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          Demo
+                        </a>
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              </motion.div>
             ))}
 
             {isAdding ? (
@@ -238,7 +268,6 @@ const Projects = () => {
                   />
                   <Textarea
                     placeholder="Project Description"
-                    rows={3}
                     value={newProj.description}
                     onChange={(e) =>
                       setNewProj({ ...newProj, description: e.target.value })
@@ -246,7 +275,7 @@ const Projects = () => {
                     required
                   />
                   <Input
-                    placeholder="Technologies (e.g. React, Tailwind)"
+                    placeholder="Technologies (comma separated e.g. React, TypeScript)"
                     value={newProj.technologies}
                     onChange={(e) =>
                       setNewProj({ ...newProj, technologies: e.target.value })
@@ -260,13 +289,16 @@ const Projects = () => {
                     }
                   />
                   <Input
-                    placeholder="Image path (/images/...)"
+                    placeholder="Image URL (e.g. /images/topamine1.PNG)"
                     value={newProj.image}
                     onChange={(e) =>
                       setNewProj({ ...newProj, image: e.target.value })
                     }
                   />
-                  <div className="flex gap-2 justify-end pt-2">
+                  <div className="flex gap-2 pt-2">
+                    <Button type="submit" size="sm">
+                      Save Project
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
@@ -275,24 +307,21 @@ const Projects = () => {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" size="sm">
-                      Save
-                    </Button>
                   </div>
                 </form>
               </Card>
             ) : (
-              <Card
-                onClick={() => setIsAdding(true)}
-                className="bg-card/40 border-dashed border-2 border-border hover:border-primary transition-all duration-300 min-h-[350px] flex flex-col items-center justify-center cursor-pointer group"
-              >
-                <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all mb-4">
-                  <Plus className="w-8 h-8 text-primary" />
-                </div>
-                <p className="font-semibold text-muted-foreground group-hover:text-primary transition-colors">
-                  Add New Project
-                </p>
-              </Card>
+              <div className="col-span-full flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAdding(true)}
+                  className="text-muted-foreground hover:text-primary border-dashed hover:border-primary"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Custom Project
+                </Button>
+              </div>
             )}
           </div>
         </div>

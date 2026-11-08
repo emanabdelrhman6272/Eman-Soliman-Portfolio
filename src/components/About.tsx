@@ -53,15 +53,15 @@ const About = () => {
               {highlights.map((item, index) => (
                 <Card
                   key={index}
-                  className="bg-card border-border hover:border-primary/50 transition-all duration-300 animate-fade-in"
+                  className="bg-card border-border hover:border-primary/50 hover:-translate-y-1.5 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 animate-fade-in group"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardContent className="p-6 flex items-start gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg">
+                    <div className="p-3 bg-primary/10 rounded-lg group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
                       <item.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-2">{item.title}</h3>
+                      <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
                       <p className="text-sm text-muted-foreground">{item.description}</p>
                     </div>
                   </CardContent>

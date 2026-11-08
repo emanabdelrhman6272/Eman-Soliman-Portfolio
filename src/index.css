@@ -7,51 +7,105 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /* =========================================================
+     الباليت الكلاسيكي الأنيق والبسيط (Classic Minimalist & Slate)
+     ========================================================= */
+
+  /* الوضع الفاتح (Light Mode) */
   :root {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
 
-    --card: 224 45% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
 
-    --popover: 224 45% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
 
-    --primary: 199 89% 48%;
-    --primary-foreground: 224 71% 4%;
+    /* الأزرق الكلاسيكي الهادئ والراقي */
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 239 84% 67%;
-    --secondary-foreground: 210 40% 98%;
+    /* الرمادي الفولاذي الكلاسيكي */
+    --secondary: 215 16% 47%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 224 30% 14%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 239 84% 67%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 224 30% 16%;
-    --input: 224 30% 16%;
-    --ring: 199 89% 48%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
 
     --radius: 0.75rem;
 
+    /* تدرج كلاسيكي راقي جداً (كربون داكن ⬅️ رمادي أنيق ⬅️ كحلي هادئ) */
     --gradient-primary: linear-gradient(
       135deg,
-      #38bdf8 0%,
-      #818cf8 50%,
-      #c084fc 100%
+      #0f172a 0%,
+      #334155 50%,
+      #2563eb 100%
     );
-    --gradient-secondary: linear-gradient(135deg, #818cf8 0%, #38bdf8 100%);
-    --gradient-hero: linear-gradient(135deg, #030712 0%, #0d1627 100%);
+    --gradient-secondary: linear-gradient(135deg, #2563eb 0%, #0f172a 100%);
+    --gradient-hero: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
 
-    --glow-primary: 0 0 35px rgba(56, 189, 248, 0.4);
-    --glow-accent: 0 0 35px rgba(129, 140, 248, 0.4);
+    --glow-primary: 0 0 25px rgba(37, 99, 235, 0.15);
+    --glow-accent: 0 0 25px rgba(15, 23, 42, 0.1);
+  }
+
+  /* الوضع الداكن (Dark Mode) */
+  .dark {
+    /* خلفية كربونية كلاسيكية فخمة */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* الأزرق الهادئ الكلاسيكي */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222 47% 6%;
+
+    /* الفضي الأنيق */
+    --secondary: 215 20% 65%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217.2 32.6% 15%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 16%;
+    --input: 217.2 32.6% 16%;
+    --ring: 217.2 91.2% 59.8%;
+
+    /* تدرج كلاسيكي هادئ وفخم (أبيض فضي ⬅️ بلاتينيوم ⬅️ أزرق سماوي ناعم) */
+    --gradient-primary: linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #cbd5e1 50%,
+      #60a5fa 100%
+    );
+    --gradient-secondary: linear-gradient(135deg, #60a5fa 0%, #ffffff 100%);
+    --gradient-hero: linear-gradient(135deg, #07090e 0%, #0d121c 100%);
+
+    --glow-primary: 0 0 25px rgba(96, 165, 250, 0.25);
+    --glow-accent: 0 0 25px rgba(148, 163, 184, 0.15);
   }
 }
-
 @layer base {
   * {
     @apply border-border;

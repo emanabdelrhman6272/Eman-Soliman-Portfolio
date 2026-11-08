@@ -133,7 +133,7 @@ const Projects = () => {
             {projectList.map((project, index) => (
               <Card
                 key={index}
-                className="bg-card border-border hover:border-primary/50 transition-all duration-300 group animate-fade-in flex flex-col justify-between"
+                className="bg-card border-border hover:border-primary/50 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 group animate-fade-in flex flex-col justify-between overflow-hidden"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div>
@@ -153,11 +153,13 @@ const Projects = () => {
                     </div>
 
                     {project.image && (
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-48 object-cover rounded-lg mt-3"
-                      />
+                      <div className="overflow-hidden rounded-lg mt-3">
+                        <img
+                          src={project.image}
+                          alt={project.title}
+                          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
                     )}
                   </CardHeader>
 

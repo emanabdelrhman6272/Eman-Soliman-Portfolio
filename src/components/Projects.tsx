@@ -7,7 +7,7 @@ import {
   Pencil,
   Upload,
   X,
-  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -20,8 +20,22 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { db } from "@/lib/firebase";
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  query,
+  orderBy,
+} from "firebase/firestore";
 
 interface Project {
+  id?: string;
   title: string;
   image?: string;
   description: string;
@@ -81,110 +95,196 @@ const emptyFormData = {
 };
 
 const Projects = () => {
-  const [projectList, setProjectList] = useState<Project[]>(() => {
-    try {
-      const saved = localStorage.getItem("eman_portfolio_projects_v2");
-      return saved ? JSON.parse(saved) : initialProjects;
-    } catch {
-      return initialProjects;
-    }
-  });
+  const { isAdmin } = useAuth(); // admin or not
 
+  const [projectList, setProjectList] = useState<Project[]>(initialProjects);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingDocId, setEditingDocId] = useState<string | null>(null);
   const [formData, setFormData] = useState(emptyFormData);
 
+  // image
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // project from firestore
   useEffect(() => {
     try {
-      localStorage.setItem(
-        "eman_portfolio_projects_v2",
-        JSON.stringify(projectList),
+      const q = query(collection(db, "projects"), orderBy("createdAt", "desc"));
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const list = snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              ...docSnap.data(),
+            })) as Project[];
+            setProjectList(list);
+          } else {
+            setProjectList(initialProjects);
+          }
+        },
+        (error) => {
+          console.error("Firestore read error:", error);
+          setProjectList(initialProjects);
+        },
       );
+
+      return () => unsubscribe();
     } catch (e) {
       console.error(e);
+      setProjectList(initialProjects);
     }
-  }, [projectList]);
+  }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 2. image from my labtop to preview in the form before uploading to Cloudinary
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 3 * 1024 * 1024) {
-      alert("Try to upload an image smaller than 3MB.");
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Please upload an image smaller than 5MB.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setFormData((prev) => ({ ...prev, image: reader.result as string }));
-      }
-    };
-    reader.readAsDataURL(file);
+    setSelectedFile(file);
+    setFormData((prev) => ({ ...prev, image: URL.createObjectURL(file) }));
   };
 
-  // Open form for editing
-  const handleStartEdit = (index: number) => {
-    const p = projectList[index];
+  // 3. upload image to Cloudinary and return the secure URL
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dv9pyarju";
+    const preset =
+      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET ||
+      "Eman-Soliman-Portfolio-preset";
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", preset);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to upload image to Cloudinary");
+    }
+
+    const fileData = await res.json();
+    return fileData.secure_url;
+  };
+
+  // 4. Editing
+  const handleStartEdit = (project: Project) => {
     setFormData({
-      title: p.title,
-      description: p.description,
-      technologies: p.technologies.join(", "),
-      github: p.github || "",
-      demo: p.demo || "",
-      image: p.image || "",
+      title: project.title,
+      description: project.description,
+      technologies: project.technologies.join(", "),
+      github: project.github || "",
+      demo: project.demo || "",
+      image: project.image || "",
     });
-    setEditingIndex(index);
+    setEditingDocId(project.id || null);
+    setSelectedFile(null);
     setIsFormOpen(true);
   };
 
-  // Open form for adding new
+  // 5. Adding new project
   const handleStartAdd = () => {
     setFormData(emptyFormData);
-    setEditingIndex(null);
+    setEditingDocId(null);
+    setSelectedFile(null);
     setIsFormOpen(true);
   };
 
   const handleCancel = () => {
     setFormData(emptyFormData);
-    setEditingIndex(null);
+    setEditingDocId(null);
+    setSelectedFile(null);
     setIsFormOpen(false);
   };
 
-  // Submit either new or edited project
-  const handleSubmitProject = (e: React.FormEvent) => {
+  // 6. saving in Firestore
+  const handleSubmitProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.description.trim()) return;
-
-    const techArray = formData.technologies
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    const projectData: Project = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      technologies: techArray.length > 0 ? techArray : ["React"],
-      github: formData.github.trim() || "https://github.com",
-      demo: formData.demo.trim() || undefined,
-      image: formData.image.trim() || "/images/weatherapp1.PNG",
-    };
-
-    if (editingIndex !== null) {
-      // Update existing project
-      const updated = [...projectList];
-      updated[editingIndex] = projectData;
-      setProjectList(updated);
-    } else {
-      // Add new project
-      setProjectList([projectData, ...projectList]);
+    if (!isAdmin) {
+      alert("Unauthorized! Only Eman can perform this action.");
+      return;
     }
 
-    handleCancel();
+    if (!formData.title.trim() || !formData.description.trim()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      let finalImageUrl = formData.image;
+
+      if (selectedFile) {
+        finalImageUrl = await uploadToCloudinary(selectedFile);
+      }
+
+      const techArray = formData.technologies
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const projectData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        technologies: techArray.length > 0 ? techArray : ["React"],
+        github: formData.github.trim() || "https://github.com",
+        demo: formData.demo.trim() || "",
+        image: finalImageUrl || "/images/weatherapp1.PNG",
+        updatedAt: serverTimestamp(),
+      };
+
+      if (editingDocId) {
+        await updateDoc(doc(db, "projects", editingDocId), projectData);
+      } else {
+        await addDoc(collection(db, "projects"), {
+          ...projectData,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      handleCancel();
+    } catch (err) {
+      console.error("Error saving project:", err);
+      alert(
+        "An error occurred while saving the project. Please check the console.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteProject = (indexToDelete: number) => {
-    setProjectList(projectList.filter((_, idx) => idx !== indexToDelete));
+  // 7. Delete project from Firestore
+  const handleDeleteProject = async (project: Project) => {
+    if (!isAdmin) return;
+
+    if (
+      window.confirm(
+        `Are you sure you want to permanently delete "${project.title}"?`,
+      )
+    ) {
+      try {
+        if (project.id) {
+          await deleteDoc(doc(db, "projects", project.id));
+        } else {
+          // Fallback for initial projects
+          setProjectList((prev) =>
+            prev.filter((p) => p.title !== project.title),
+          );
+        }
+      } catch (err) {
+        console.error("Error deleting project:", err);
+        alert("Could not delete project from database.");
+      }
+    }
   };
 
   return (
@@ -209,8 +309,21 @@ const Projects = () => {
             </p>
           </motion.div>
 
-          {/* Project Form for Adding or Editing */}
-          {isFormOpen && (
+          {/* Add New Project: visible to Admin only */}
+          {isAdmin && !isFormOpen && (
+            <div className="flex justify-center mb-12">
+              <Button
+                onClick={handleStartAdd}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg px-6 py-2 rounded-full font-medium flex items-center gap-2 transition-all hover:scale-105"
+              >
+                <Plus className="w-5 h-5" />
+                Add New Project (Admin)
+              </Button>
+            </div>
+          )}
+
+          {/* Add or Edit Project Form */}
+          {isAdmin && isFormOpen && (
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -220,14 +333,11 @@ const Projects = () => {
                 <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
                   <div>
                     <h3 className="font-bold text-xl gradient-text">
-                      {editingIndex !== null
-                        ? "Edit Project"
-                        : "Add New Project"}
+                      {editingDocId ? "Edit Project" : "Add New Project"}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {editingIndex !== null
-                        ? "Editing"
-                        : " You can edit or add a new project to showcase in your portfolio."}
+                      Fill in the details. Images will be automatically uploaded
+                      to Cloudinary.
                     </p>
                   </div>
                   <Button
@@ -260,8 +370,7 @@ const Projects = () => {
                       Description
                     </label>
                     <Textarea
-                      placeholder="Explain Project idea"
-                      rows={3}
+                      placeholder="Describe the application features and stack..."
                       value={formData.description}
                       onChange={(e) =>
                         setFormData({
@@ -269,16 +378,17 @@ const Projects = () => {
                           description: e.target.value,
                         })
                       }
+                      rows={3}
                       required
                     />
                   </div>
 
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
-                      Technologies
+                      Technologies (comma separated)
                     </label>
                     <Input
-                      placeholder="React, TypeScript, Tailwind CSS, Firebase..."
+                      placeholder="React, TypeScript, Firebase, Tailwind CSS"
                       value={formData.technologies}
                       onChange={(e) =>
                         setFormData({
@@ -289,10 +399,10 @@ const Projects = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
-                        GitHub
+                        GitHub Link
                       </label>
                       <Input
                         placeholder="https://github.com/..."
@@ -304,7 +414,7 @@ const Projects = () => {
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
-                        Live Demo
+                        Live Demo Link (Optional)
                       </label>
                       <Input
                         placeholder="https://my-app.vercel.app"
@@ -316,42 +426,43 @@ const Projects = () => {
                     </div>
                   </div>
 
-                  {/* Image Upload Zone */}
+                  {/* Cloudinary Image Upload */}
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                      Upload Image
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">
+                      Project Image (Upload to Cloud)
                     </label>
 
                     {formData.image ? (
-                      <div className="relative rounded-xl overflow-hidden border border-border h-48 bg-muted/30 group">
+                      <div className="relative group rounded-xl overflow-hidden border border-border">
                         <img
                           src={formData.image}
-                          alt="Project Preview"
-                          className="w-full h-full object-cover"
+                          alt="Preview"
+                          className="w-full h-44 object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <label
-                            htmlFor="project-img-file"
-                            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-all shadow-md"
+                            htmlFor="cloud-img-file"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium cursor-pointer hover:bg-primary/90 transition-all shadow-md"
                           >
                             <Upload className="w-4 h-4" />
                             Change Image
                           </label>
                           <button
                             type="button"
-                            onClick={() =>
-                              setFormData({ ...formData, image: "" })
-                            }
+                            onClick={() => {
+                              setFormData({ ...formData, image: "" });
+                              setSelectedFile(null);
+                            }}
                             className="inline-flex items-center gap-1.5 px-3 py-2 bg-destructive text-destructive-foreground rounded-lg text-xs font-medium hover:bg-destructive/90 transition-all shadow-md"
                           >
                             <Trash2 className="w-4 h-4" />
-                            Delete This Image
+                            Remove
                           </button>
                         </div>
                       </div>
                     ) : (
                       <label
-                        htmlFor="project-img-file"
+                        htmlFor="cloud-img-file"
                         className="flex flex-col items-center justify-center gap-2.5 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary bg-muted/20 hover:bg-muted/40 cursor-pointer transition-all text-center"
                       >
                         <div className="p-3 rounded-full bg-primary/10 text-primary">
@@ -359,10 +470,10 @@ const Projects = () => {
                         </div>
                         <div>
                           <span className="text-sm font-semibold text-foreground">
-                            Upload
+                            Upload from Computer to Cloudinary
                           </span>
                           <p className="text-xs text-muted-foreground mt-1">
-                            PNG or JPG or WebP
+                            PNG, JPG or WebP (Cloud Hosted)
                           </p>
                         </div>
                       </label>
@@ -370,37 +481,37 @@ const Projects = () => {
 
                     <input
                       type="file"
-                      id="project-img-file"
+                      id="cloud-img-file"
                       accept="image/*"
-                      onChange={handleImageUpload}
+                      onChange={handleImageChange}
                       className="hidden"
                     />
-
-                    {/* Optional URL */}
-                    <div className="mt-2">
-                      <Input
-                        placeholder="/images/..."
-                        value={formData.image}
-                        onChange={(e) =>
-                          setFormData({ ...formData, image: e.target.value })
-                        }
-                        className="text-xs"
-                      />
-                    </div>
                   </div>
 
                   <div className="flex gap-3 pt-4 border-t border-border">
-                    <Button type="submit" className="flex-1">
-                      {editingIndex !== null
-                        ? "Save Editing"
-                        : " Adding new Project "}
+                    <Button
+                      type="submit"
+                      className="flex-1 font-semibold"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading & Saving...
+                        </>
+                      ) : editingDocId ? (
+                        "Save Project Changes"
+                      ) : (
+                        "Add Project to Portfolio"
+                      )}
                     </Button>
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={handleCancel}
+                      disabled={isSubmitting}
                     >
-                      Exit
+                      Cancel
                     </Button>
                   </div>
                 </form>
@@ -408,11 +519,11 @@ const Projects = () => {
             </motion.div>
           )}
 
-          {/* Projects Grid (Compact 3 columns on large screens) */}
+          {/* Projects Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projectList.map((project, index) => (
               <motion.div
-                key={index}
+                key={project.id || index}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -431,25 +542,27 @@ const Projects = () => {
                           {project.title}
                         </h3>
 
-                        {/* Action buttons: Edit & Delete */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            type="button"
-                            onClick={() => handleStartEdit(index)}
-                            className="p-1 text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-primary/10"
-                            title="Edit Project"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProject(index)}
-                            className="p-1 text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-destructive/10"
-                            title="Delete Project"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                        {/* Edit and Delete Actions: Admin only */}
+                        {isAdmin && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(project)}
+                              className="p-1.5 text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-primary/10"
+                              title="Edit Project"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteProject(project)}
+                              className="p-1.5 text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-destructive/10"
+                              title="Delete Project"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       {project.image && (
@@ -532,21 +645,6 @@ const Projects = () => {
                 </Card>
               </motion.div>
             ))}
-
-            {/* Add Custom Project Button Trigger */}
-            {!isFormOpen && (
-              <div className="col-span-full flex justify-center pt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleStartAdd}
-                  className="text-muted-foreground hover:text-primary border-dashed hover:border-primary"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Custom Project
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </div>
